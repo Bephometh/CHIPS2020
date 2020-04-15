@@ -28,6 +28,7 @@ $connectstr_dbpassword = '';
 foreach ($_SERVER as $key => $value) {
  if (strpos($key, "MYSQLCONNSTR_localdb") !== 0) {
  continue;
+ 
  }
  
  $connectstr_dbhost = preg_replace("/^.*Data Source=(.+?);.*$/", "\\1", $value);
