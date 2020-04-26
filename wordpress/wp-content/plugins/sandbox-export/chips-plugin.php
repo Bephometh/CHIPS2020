@@ -36,10 +36,10 @@
 		}
 		// add_action('load-' .  $hook_name, 'full_order_exporters_page_submit');
 		add_action('load-' .  $hook_name, 'getOrders');
+		
 		function full_order_exporters_page_submit() {
 			$logger = wc_get_logger();
 			$logger -> info('Export request receiver');
-
 		}
 		
 		function getOrders(){
@@ -101,7 +101,35 @@
 				}
 			}
 			$logger -> info(print_r($data,TRUE));
-			return $data;
+			//return $data;	
+			exportXLS($data);
+		}
+		
+		function exportXLS($data){
+			header("Content-type: application/vnd-ms-excel");
+			header("Content-Disposition: attachment; filename= chips.xls");
+			echo "<table>";
+			foreach($data as $user){
+				echo "<tr>";
+				foreach($user as $value){
+					if(!is_array($value)){
+						echo "<td>";
+						echo is_array($value);
+						echo print_r($value,TRUE);
+						echo "</td>";
+					}
+					else{
+						foreach($value as $arr_value){
+							echo "<td>";
+							echo print_r($arr_value,TRUE);
+							echo "</td>";
+						}
+					}
+				}
+				echo "</tr>";
+			}
+			echo "</table>";
+			exit();
 		}
 	}
 	
