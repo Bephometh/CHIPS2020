@@ -35,11 +35,15 @@
 			<?php
 		}
 		// add_action('load-' .  $hook_name, 'full_order_exporters_page_submit');
-		add_action('load-' .  $hook_name, 'getOrders');
+		if('POST' === $_SERVER['REQUEST_METHOD']) {
+			add_action('load-' .  $hook_name, 'getOrders');
+		}
 		
 		function full_order_exporters_page_submit() {
-			$logger = wc_get_logger();
-			$logger -> info('Export request receiver');
+			if('POST' === $_SERVER['REQUEST_METHOD']) {
+				$logger = wc_get_logger();
+				$logger -> info('Export request receiver');
+			}
 		}
 		
 		function getOrders(){
