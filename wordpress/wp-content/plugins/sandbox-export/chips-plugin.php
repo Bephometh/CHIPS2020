@@ -6,7 +6,9 @@
 	* Author: Group D
 	*
 	**/
-
+	
+	require_once plugin_dir_path( __FILE__ ) . 'Classes/PHPExcel.php';
+	
 	if ( ! defined( 'ABSPATH' ) ) {
 		exit; // Exit if accessed directly
 	}
@@ -75,13 +77,17 @@
 								'product' => $item->get_name(),
 								'qty' => $item->get_quantity(),
 								'total' => $item->get_total(),
-								'metas' => ''
+								'siswa1' => $item->get_meta('Nama Siswa (Anggota 1)'),
+								'siswa2' => $item->get_meta('Nama Siswa (Anggota 2)')
+								//'metas' => ''
 							);
+							/*
 							$metas = array(
 								'Nama Siswa (Anggota 1)' =>  $item->get_meta('Nama Siswa (Anggota 1)'),
 								'Nama Siswa (Anggota 2)' => $item->get_meta('Nama Siswa (Anggota 2)')
 							);
 							$billing['metas'] = $metas;
+							*/
 							array_push($data,$billing);
 					}
 					else{
@@ -110,9 +116,49 @@
 		}
 		
 		function exportXLS($data){
-			header("Content-type: application/vnd-ms-excel");
-			header("Content-Disposition: attachment; filename= chips.xls");
-			echo "<table>";
+			$objPHPExcel = new PHPExcel();	
+			$sheet = $objPHPExcel->getActiveSheet();
+			
+			$sheet->setCellValue('A1', 'ID');
+			$sheet->setCellValue('B1', 'Name');
+			$sheet->setCellValue('C1', 'Last Name');
+			$sheet->setCellValue('D1', 'Company');
+			$sheet->setCellValue('E1', 'Address 1');
+			$sheet->setCellValue('F1', 'Address 2');
+			$sheet->setCellValue('G1', 'City');
+			$sheet->setCellValue('H1', 'Postal Code');
+			$sheet->setCellValue('I1', 'State');
+			$sheet->setCellValue('J1', 'Email');
+			$sheet->setCellValue('K1', 'Telephone');
+			$sheet->setCellValue('L1', 'Product');
+			$sheet->setCellValue('M1', 'Quantity');
+			$sheet->setCellValue('N1', 'Total');
+			$sheet->setCellValue('O1', 'Member 1');
+			$sheet->setCellValue('P1', 'Member 2');
+			$sheet->fromArray($data, NULL, 'A2');
+			
+			$cellIterator = $sheet->getRowIterator()->current()->getCellIterator();
+		    $cellIterator->setIterateOnlyExistingCells(true);
+		    foreach ($cellIterator as $cell) {
+		        $sheet->getColumnDimension($cell->getColumn())->setAutoSize(true);
+		    }
+			
+			$header = $objPHPExcel->getActiveSheet()->getStyle('A1:P1');
+			$header->getFont()->setBold(true);
+			$header->getFill()
+			    ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
+			    ->getStartColor()
+			    ->setRGB('C0C0C0');
+			
+			header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+			header('Content-Disposition: attachment;filename="chips.xlsx"');
+			header('Cache-Control: max-age=0');
+			
+			$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+			$objWriter->save('php://output');
+			exit();
+			
+			/*echo "<table>";
 			foreach($data as $user){
 				echo "<tr>";
 				foreach($user as $value){
@@ -133,7 +179,7 @@
 				echo "</tr>";
 			}
 			echo "</table>";
-			exit();
+			exit();*/
 		}
 	}
 	
