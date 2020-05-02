@@ -64,11 +64,9 @@
 					if($custom_val == true){
 							$billing = array(
 								'id' => $order->get_id(),
-								'name' => $order->get_billing_first_name(),
-								'last_name' =>$order->get_billing_last_name(),
+								'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),  
 								'company' => $order->get_billing_company(),
-								'address1' => $order->get_billing_address_1(),
-								'address2' =>$order -> get_billing_address_2(),
+								'address1' => $order->get_billing_address_1() . ' ' . $order -> get_billing_address_2(),
 								'city' => $order->get_billing_city(),
 								'post_code' => $order->get_billing_postcode(),
 								'state' => $order->get_billing_state(),
@@ -92,11 +90,9 @@
 					}
 					else{
 							$billing = array(
-								'name' => $order->get_billing_first_name(),
-								'last_name' =>$order->get_billing_last_name(),
+								'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),  
 								'company' => $order->get_billing_company(),
-								'address1' => $order->get_billing_address_1(),
-								'address2' =>$order -> get_billing_address_2(),
+								'address1' => $order->get_billing_address_1() . ' ' . $order -> get_billing_address_2(),
 								'city' => $order->get_billing_city(),
 								'post_code' => $order->get_billing_postcode(),
 								'state' => $order->get_billing_state(),
@@ -121,20 +117,18 @@
 			
 			$sheet->setCellValue('A1', 'ID');
 			$sheet->setCellValue('B1', 'Name');
-			$sheet->setCellValue('C1', 'Last Name');
-			$sheet->setCellValue('D1', 'Company');
-			$sheet->setCellValue('E1', 'Address 1');
-			$sheet->setCellValue('F1', 'Address 2');
-			$sheet->setCellValue('G1', 'City');
-			$sheet->setCellValue('H1', 'Postal Code');
-			$sheet->setCellValue('I1', 'State');
-			$sheet->setCellValue('J1', 'Email');
-			$sheet->setCellValue('K1', 'Telephone');
-			$sheet->setCellValue('L1', 'Product');
-			$sheet->setCellValue('M1', 'Quantity');
-			$sheet->setCellValue('N1', 'Total');
-			$sheet->setCellValue('O1', 'Member 1');
-			$sheet->setCellValue('P1', 'Member 2');
+			$sheet->setCellValue('c1', 'Company');
+			$sheet->setCellValue('D1', 'Address');
+			$sheet->setCellValue('E1', 'City');
+			$sheet->setCellValue('F1', 'Postal Code');
+			$sheet->setCellValue('G1', 'State');
+			$sheet->setCellValue('H1', 'Email');
+			$sheet->setCellValue('I1', 'Telephone');
+			$sheet->setCellValue('J1', 'Product');
+			$sheet->setCellValue('K1', 'Quantity');
+			$sheet->setCellValue('L1', 'Total');
+			$sheet->setCellValue('M1', 'Member 1');
+			$sheet->setCellValue('N1', 'Member 2');
 			$sheet->fromArray($data, NULL, 'A2');
 			
 			$cellIterator = $sheet->getRowIterator()->current()->getCellIterator();
