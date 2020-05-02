@@ -36,7 +36,6 @@
 			</div>
 			<?php
 		}
-		// add_action('load-' .  $hook_name, 'full_order_exporters_page_submit');
 		if('POST' === $_SERVER['REQUEST_METHOD']) {
 			add_action('load-' .  $hook_name, 'getOrders');
 		}
@@ -60,7 +59,7 @@
 			$data = array();
 			foreach($orders as $order){
 				foreach($order->get_items() as $item_id => $item){
-					//For custome values meta key
+					//For custom values meta key
 					if($custom_val == true){
 							$billing = array(
 								'id' => $order->get_id(),
@@ -77,15 +76,7 @@
 								'total' => $item->get_total(),
 								'siswa1' => $item->get_meta('Nama Siswa (Anggota 1)'),
 								'siswa2' => $item->get_meta('Nama Siswa (Anggota 2)')
-								//'metas' => ''
 							);
-							/*
-							$metas = array(
-								'Nama Siswa (Anggota 1)' =>  $item->get_meta('Nama Siswa (Anggota 1)'),
-								'Nama Siswa (Anggota 2)' => $item->get_meta('Nama Siswa (Anggota 2)')
-							);
-							$billing['metas'] = $metas;
-							*/
 							array_push($data,$billing);
 					}
 					else{
@@ -107,7 +98,6 @@
 				}
 			}
 			$logger -> info(print_r($data,TRUE));
-			//return $data;	
 			exportXLS($data);
 		}
 		
@@ -151,29 +141,6 @@
 			$objWriter = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
 			$objWriter->save('php://output');
 			exit();
-			
-			/*echo "<table>";
-			foreach($data as $user){
-				echo "<tr>";
-				foreach($user as $value){
-					if(!is_array($value)){
-						echo "<td>";
-						echo is_array($value);
-						echo print_r($value,TRUE);
-						echo "</td>";
-					}
-					else{
-						foreach($value as $arr_value){
-							echo "<td>";
-							echo print_r($arr_value,TRUE);
-							echo "</td>";
-						}
-					}
-				}
-				echo "</tr>";
-			}
-			echo "</table>";
-			exit();*/
 		}
 	}
 	
