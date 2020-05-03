@@ -84,11 +84,13 @@
 		function getOrders(){
 			$start = $_REQUEST['date-start'];
 			$end = $_REQUEST['date-end'];
+			$startUTC = strtotime($start . ' 00:00:00');
+			$endUTC = strtotime($end . ' 23:59:59');
 			$custom_val = true;
 			$args = array(
 				'order' => 'ASC',
 				'limit' => 9999,
-				'date_completed' => $start . '...' . $end,
+				'date_completed' => $startUTC . '...' . $endUTC,
 			);
 			$query = new WC_Order_query($args);
 			$orders = WC_get_orders($args);
