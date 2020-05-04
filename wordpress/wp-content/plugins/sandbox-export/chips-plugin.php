@@ -25,12 +25,17 @@
 			//check user capabilities
 			if( ! current_user_can('view_woocommerce_reports')) {
 				return;
-			}
+			};
 			?>
 			<div class="wrap">
 				<h1><?= esc_html(get_admin_page_title()); ?></h1>
 				<form action="<?php menu_page_url('full-orders-exporters') ?>" method="POST">
 					<table>
+						<tr>
+							<th>
+								Order Complete Date
+							</th>
+						</tr>
 						<tr>
 							<td>
 								Date start
@@ -39,7 +44,7 @@
 								:
 							</td>
 							<td>
-								<input type="date" id="start" name="date-start" required>
+								<input type="date" id="start" name="date-start" >
 							</td>
 						</tr>
 						<tr>
@@ -50,7 +55,18 @@
 								:
 							</td>
 							<td>
-								<input type="date" id="end" name="date-end" required>
+								<input type="date" id="end" name="date-end">
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Export All
+							</td>
+							<td>
+								:
+							</td>
+							<td>
+								<input type="checkbox" id="export-all" name="export-all">
 							</td>
 						</tr>
 						<tr>
@@ -87,56 +103,60 @@
 			$startUTC = strtotime($start . ' 00:00:00');
 			$endUTC = strtotime($end . ' 23:59:59');
 			$custom_val = true;
-			$args = array(
-				'order' => 'ASC',
-				'limit' => 9999,
-				'date_completed' => $startUTC . '...' . $endUTC,
-			);
-			$query = new WC_Order_query($args);
+			if(!isset($_REQUEST['export-all'])){
+				if($statUTC === TRUE && $endUTC === FALSE){
+					$args = array(
+						'order' => 'ASC',
+						'limit' => 9999,
+						'date_completed' => $startUTC . '...' . $endUTC,
+					);	
+					print_r($startUTC, TRUE);
+				}
+				else{
+					add_action('admin_notices','failed_notice');
+					function failed_notice(){
+						echo '<div class="notice notice-warning is-dismissible">
+					             <p>Please pick a date.</p>
+					         </div>';
+					}
+					return;
+				}
+				
+			}
+			else{
+				$args = array(
+					'order' => 'ASC',
+					'limit' => 9999,
+				);
+			}
+			
 			$orders = WC_get_orders($args);
 			$logger = wc_get_logger();
 			$data = array();
 			foreach($orders as $order){
 				foreach($order->get_items() as $item_id => $item){
-					//For custom values meta key
-					if($custom_val == true){
-							$billing = array(
-								'id' => $order->get_id(),
-								'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),  
-								'company' => $order->get_billing_company(),
-								'address1' => $order->get_billing_address_1() . ' ' . $order -> get_billing_address_2(),
-								'city' => $order->get_billing_city(),
-								'post_code' => $order->get_billing_postcode(),
-								'state' => $order->get_billing_state(),
-								'email' => $order->get_billing_email(),
-								'telephone'=> $order->get_billing_phone(),
-								'product' => $item->get_name(),
-								'qty' => $item->get_quantity(),
-								'total' => $item->get_total(),
-								'siswa1' => $item->get_meta('Nama Siswa (Anggota 1)'),
-								'siswa2' => $item->get_meta('Nama Siswa (Anggota 2)')
-							);
-							array_push($data,$billing);
-					}
-					else{
-							$billing = array(
-								'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),  
-								'company' => $order->get_billing_company(),
-								'address1' => $order->get_billing_address_1() . ' ' . $order -> get_billing_address_2(),
-								'city' => $order->get_billing_city(),
-								'post_code' => $order->get_billing_postcode(),
-								'state' => $order->get_billing_state(),
-								'email' => $order->get_billing_email(),
-								'telephone'=> $order->get_billing_phone(),
-								'product' => $item->get_name(),
-								'qty' => $item->get_quantity(),
-								'total' => $item->get_total()
-							);
-							 array_push($data,$billing);
-					}
+					$billing = array(
+						'id' => $order->get_id(),
+						'date' => $order->get_date_completed(),
+						'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),  
+						'company' => $order->get_billing_company(),
+						'address1' => $order->get_billing_address_1() . ' ' . $order -> get_billing_address_2(),
+						'city' => $order->get_billing_city(),
+						'post_code' => $order->get_billing_postcode(),
+						'state' => $order->get_billing_state(),
+						'email' => $order->get_billing_email(),
+						'telephone'=> $order->get_billing_phone(),
+						'product' => $item->get_name(),
+						'qty' => $item->get_quantity(),
+						'total' => $item->get_total(),
+						'siswa1' => $item->get_meta('Nama Siswa (Anggota 1)'),
+						'siswa2' => $item->get_meta('Nama Siswa (Anggota 2)')
+					);
+					array_push($data,$billing);
 				}
 			}
-			$logger -> info(print_r($data,TRUE));
+			// $logger -> info(print_r($data,TRUE));
+			$logger -> info(print_r($start));
 			exportXLS($data);
 		}
 		
@@ -145,19 +165,20 @@
 			$sheet = $objPHPExcel->getActiveSheet();
 			
 			$sheet->setCellValue('A1', 'ID');
-			$sheet->setCellValue('B1', 'Name');
-			$sheet->setCellValue('c1', 'Company');
-			$sheet->setCellValue('D1', 'Address');
-			$sheet->setCellValue('E1', 'City');
-			$sheet->setCellValue('F1', 'Postal Code');
-			$sheet->setCellValue('G1', 'State');
-			$sheet->setCellValue('H1', 'Email');
-			$sheet->setCellValue('I1', 'Telephone');
-			$sheet->setCellValue('J1', 'Product');
-			$sheet->setCellValue('K1', 'Quantity');
-			$sheet->setCellValue('L1', 'Total');
-			$sheet->setCellValue('M1', 'Member 1');
-			$sheet->setCellValue('N1', 'Member 2');
+			$sheet->setCellValue('B1', 'Date Completed');
+			$sheet->setCellValue('C1', 'Name');
+			$sheet->setCellValue('D1', 'Company');
+			$sheet->setCellValue('E1', 'Address');
+			$sheet->setCellValue('F1', 'City');
+			$sheet->setCellValue('G1', 'Postal Code');
+			$sheet->setCellValue('H1', 'State');
+			$sheet->setCellValue('I1', 'Email');
+			$sheet->setCellValue('J1', 'Telephone');
+			$sheet->setCellValue('K1', 'Product');
+			$sheet->setCellValue('L1', 'Quantity');
+			$sheet->setCellValue('M1', 'Total');
+			$sheet->setCellValue('N1', 'Member 1');
+			$sheet->setCellValue('O1', 'Member 2');
 			$sheet->fromArray($data, NULL, 'A2');
 			
 			$cellIterator = $sheet->getRowIterator()->current()->getCellIterator();
