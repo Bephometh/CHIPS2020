@@ -30,7 +30,41 @@
 			<div class="wrap">
 				<h1><?= esc_html(get_admin_page_title()); ?></h1>
 				<form action="<?php menu_page_url('full-orders-exporters') ?>" method="POST">
-					<button type="submit" class="button">Export Now</button>
+					<table>
+						<tr>
+							<td>
+								Date start
+							</td>
+							<td>
+								:
+							</td>
+							<td>
+								<input type="date" id="start" name="date-start" required>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								Date end
+							</td>
+							<td>
+								:
+							</td>
+							<td>
+								<input type="date" id="end" name="date-end" required>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								
+							</td>
+							<td>
+								
+							</td>
+							<td style="text-align: right">
+								<button type="submit" class="button">Export Now</button>
+							</td>
+						</tr>
+					</table>
 				</form>
                 <p>*Export all orders(CHIPS participant) to Excel</p>
 			</div>
@@ -48,10 +82,15 @@
 		}
 		
 		function getOrders(){
+			$start = $_REQUEST['date-start'];
+			$end = $_REQUEST['date-end'];
+			$startUTC = strtotime($start . ' 00:00:00');
+			$endUTC = strtotime($end . ' 23:59:59');
 			$custom_val = true;
 			$args = array(
 				'order' => 'ASC',
-				'limit' => 9999
+				'limit' => 9999,
+				'date_completed' => $startUTC . '...' . $endUTC,
 			);
 			$query = new WC_Order_query($args);
 			$orders = WC_get_orders($args);
