@@ -102,15 +102,13 @@
 			$end = $_REQUEST['date-end'];
 			$startUTC = strtotime($start . ' 00:00:00');
 			$endUTC = strtotime($end . ' 23:59:59');
-			$custom_val = true;
-			if(!isset($_REQUEST['export-all'])){
-				if($statUTC === TRUE && $endUTC === FALSE){
+			if(!isset($_POST['export-all'])){
+				if($start !== ""  && $end !== ""){
 					$args = array(
 						'order' => 'ASC',
 						'limit' => 9999,
 						'date_completed' => $startUTC . '...' . $endUTC,
-					);	
-					print_r($startUTC, TRUE);
+					);
 				}
 				else{
 					add_action('admin_notices','failed_notice');
@@ -121,7 +119,6 @@
 					}
 					return;
 				}
-				
 			}
 			else{
 				$args = array(
@@ -131,33 +128,45 @@
 			}
 			
 			$orders = WC_get_orders($args);
-			$logger = wc_get_logger();
-			$data = array();
-			foreach($orders as $order){
-				foreach($order->get_items() as $item_id => $item){
-					$billing = array(
-						'id' => $order->get_id(),
-						'date' => $order->get_date_completed(),
-						'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),  
-						'company' => $order->get_billing_company(),
-						'address1' => $order->get_billing_address_1() . ' ' . $order -> get_billing_address_2(),
-						'city' => $order->get_billing_city(),
-						'post_code' => $order->get_billing_postcode(),
-						'state' => $order->get_billing_state(),
-						'email' => $order->get_billing_email(),
-						'telephone'=> $order->get_billing_phone(),
-						'product' => $item->get_name(),
-						'qty' => $item->get_quantity(),
-						'total' => $item->get_total(),
-						'siswa1' => $item->get_meta('Nama Siswa (Anggota 1)'),
-						'siswa2' => $item->get_meta('Nama Siswa (Anggota 2)')
-					);
-					array_push($data,$billing);
+			if(!empty($orders)){
+				$logger = wc_get_logger();
+				$data = array();
+				foreach($orders as $order){
+					foreach($order->get_items() as $item_id => $item){
+						$billing = array(
+							'id' => $order->get_id(),
+							'date' => $order->get_date_completed(),
+							'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),  
+							'company' => $order->get_billing_company(),
+							'address1' => $order->get_billing_address_1() . ' ' . $order -> get_billing_address_2(),
+							'city' => $order->get_billing_city(),
+							'post_code' => $order->get_billing_postcode(),
+							'state' => $order->get_billing_state(),
+							'email' => $order->get_billing_email(),
+							'telephone'=> $order->get_billing_phone(),
+							'product' => $item->get_name(),
+							'qty' => $item->get_quantity(),
+							'total' => $item->get_total(),
+							'siswa1' => $item->get_meta('Nama Siswa (Anggota 1)'),
+							'siswa2' => $item->get_meta('Nama Siswa (Anggota 2)')
+						);
+						array_push($data,$billing);
+					}
 				}
+				//print_r($orders);
+				$logger -> info(print_r($data,TRUE));
+				exportXLS($data);
 			}
-			// $logger -> info(print_r($data,TRUE));
-			$logger -> info(print_r($start));
-			exportXLS($data);
+			else{
+				add_action('admin_notices','failed_notice');
+					function failed_notice(){
+						echo '<div class="notice notice-warning is-dismissible">
+					             <p>No order exist.</p>
+					         </div>';
+					}
+					return;
+			}
+			
 		}
 		
 		function exportXLS($data){
@@ -187,7 +196,8 @@
 		        $sheet->getColumnDimension($cell->getColumn())->setAutoSize(true);
 		    }
 			
-			$header = $objPHPExcel->getActiveSheet()->getStyle('A1:P1');
+			
+			$header = $objPHPExcel->getActiveSheet()->getStyle('A1:O1');
 			$header->getFont()->setBold(true);
 			$header->getFill()
 			    ->setFillType(PHPExcel_Style_Fill::FILL_SOLID)
