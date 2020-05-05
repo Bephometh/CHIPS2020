@@ -68,6 +68,9 @@
 							<td>
 								<input type="checkbox" id="export-all" name="export-all">
 							</td>
+							<td>
+								* Check if you want to import all orders. Will Override Date if date is picked
+							</td>
 						</tr>
 						<tr>
 							<td>
