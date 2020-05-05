@@ -153,7 +153,6 @@
 						array_push($data,$billing);
 					}
 				}
-				//print_r($orders);
 				$logger -> info(print_r($data,TRUE));
 				exportXLS($data);
 			}
